@@ -5,11 +5,13 @@ import (
 )
 
 type Config struct {
-	Me        string
-	Users     map[string]string
-	ApiToken  string
-	ApiUrl    string
-	ProjectId string
+	Me          string
+	Users       map[string]string
+	ApiToken    string
+	ApiUrl      string
+	ProjectId   string
+	TaskUrl     string
+	TaskIdRegex string
 }
 
 type Flags struct {

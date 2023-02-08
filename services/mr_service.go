@@ -69,11 +69,14 @@ func (s *MrService) PrepareResult() map[int]*models.Result {
 }
 
 func (s *MrService) PrintTable(result map[int]*models.Result) {
+	headers := []string{"Task", "MR", "Author", "Given approvals", "Need approvals", "Open discussions count", "Is last pipeline failed"}
+	if s.config.TaskIdRegex == "" {
+		headers = headers[1:]
+	}
+
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetRowLine(true)
-	table.SetHeader([]string{"Task", "MR", "Author", "Given approvals", "Need approvals", "Open discussions count", "Is last pipeline failed"})
-
-	var re = regexp.MustCompile(`(?m)ADENGI-(\d{3,5})`) // todo
+	table.SetHeader(headers)
 
 	var keys []int
 	for iid := range result {
@@ -100,11 +103,13 @@ func (s *MrService) PrintTable(result map[int]*models.Result) {
 			}
 		}
 
-		//mRUrl := fmt.Sprintf("\033]8;;%v\033\\%v\033]8;;\033\\", mR.WebURL, mR.Iid)
-		match := re.FindAllString(item.Title, -1)
 		taskUrl := ""
-		if len(match) > 0 {
-			taskUrl = "https://jira.adengi.tech/browse/" + match[0] //todo
+		if s.config.TaskIdRegex != "" {
+			re := regexp.MustCompile(s.config.TaskIdRegex)
+			match := re.FindAllString(item.Title, -1)
+			if len(match) > 0 {
+				taskUrl = s.config.TaskUrl + match[0]
+			}
 		}
 
 		hasFailedPipeline := "-"
@@ -112,7 +117,7 @@ func (s *MrService) PrintTable(result map[int]*models.Result) {
 			hasFailedPipeline = "+"
 		}
 
-		table.Append([]string{
+		row := []string{
 			taskUrl,
 			fmt.Sprintf("%v (%v)", item.Title, item.WebURL),
 			item.Author.Username,
@@ -120,7 +125,13 @@ func (s *MrService) PrintTable(result map[int]*models.Result) {
 			fmt.Sprint(item.NeedApprovals),
 			strconv.Itoa(len(item.NeedDiscs)),
 			hasFailedPipeline,
-		})
+		}
+
+		if taskUrl == "" {
+			row = row[1:]
+		}
+
+		table.Append(row)
 	}
 
 	fmt.Println()
