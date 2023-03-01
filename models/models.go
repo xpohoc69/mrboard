@@ -9,7 +9,6 @@ type Config struct {
 	Users       map[string]string
 	ApiToken    string
 	ApiUrl      string
-	ProjectId   string
 	TaskUrl     string
 	TaskIdRegex string
 }
@@ -59,9 +58,12 @@ type Discussions []struct {
 	} `json:"notes"`
 }
 
-type Pipelines []struct {
-	ID int `json:"id"`
+type Pipeline struct {
+	ID        int `json:"id"`
+	ProjectID int `json:"project_id"`
 }
+
+type Pipelines []Pipeline
 
 type PipelineSummary struct {
 	Total struct {
@@ -116,6 +118,7 @@ type NeedDiscs map[string]string
 
 type Result struct {
 	Iid           int
+	ProjectID     int
 	Title         string
 	WebURL        string
 	Author        Author

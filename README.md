@@ -23,3 +23,7 @@ CLI dashboard for Gitlab merge requests
 -nma
     Show merge requests where my approval is needed. Default is false
 ```
+
+## FAQ
+
+If the dashboard doesn't fit in the console and looks ugly, zoom out the console

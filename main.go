@@ -42,7 +42,6 @@ func init() {
 	config.Users = users
 	config.ApiToken = os.Getenv("APP_API_TOKEN")
 	config.ApiUrl = os.Getenv("APP_GITLAB_API_URL")
-	config.ProjectId = os.Getenv("APP_PROJECT_ID")
 	config.TaskUrl = os.Getenv("APP_TASK_URL")
 	config.TaskIdRegex = os.Getenv("APP_TASK_ID_REGEX")
 }

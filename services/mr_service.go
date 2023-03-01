@@ -49,6 +49,7 @@ func (s *MrService) PrepareResult() map[int]*models.Result {
 	for _, mR := range mergeRequests {
 		result[mR.Iid] = &models.Result{
 			Iid:           mR.Iid,
+			ProjectID:     mR.ProjectID,
 			Title:         mR.Title,
 			WebURL:        mR.WebURL,
 			Author:        mR.Author,
@@ -105,7 +106,7 @@ func (s *MrService) PrintTable(result map[int]*models.Result) {
 			}
 		}
 
-		taskUrl := ""
+		taskUrl := " "
 		if s.config.TaskIdRegex != "" {
 			re := regexp.MustCompile(s.config.TaskIdRegex)
 			match := re.FindAllString(item.Title, -1)
@@ -142,13 +143,12 @@ func (s *MrService) PrintTable(result map[int]*models.Result) {
 
 func (s *MrService) getApprovals(result map[int]*models.Result) map[int]*models.Result {
 	s.mu.RLock()
-	for iid, item := range result {
+	for _, item := range result {
 		item := item
-		iid := iid
 		s.wg.Add(1)
 		go func() {
 			defer s.wg.Done()
-			approval, err := s.requester.GetApprovals(iid)
+			approval, err := s.requester.GetApprovals(item)
 			if err != nil {
 				log.Println(err)
 				return
@@ -168,7 +168,7 @@ func (s *MrService) getApprovals(result map[int]*models.Result) map[int]*models.
 			}
 			s.mu.Lock()
 			item.NeedApprovals = copyUsers
-			result[iid] = item
+			result[item.Iid] = item
 			s.mu.Unlock()
 		}()
 	}
@@ -179,13 +179,12 @@ func (s *MrService) getApprovals(result map[int]*models.Result) map[int]*models.
 
 func (s *MrService) getDiscussions(result map[int]*models.Result) map[int]*models.Result {
 	s.mu.RLock()
-	for iid, item := range result {
+	for _, item := range result {
 		item := item
-		iid := iid
 		s.wg.Add(1)
 		go func() {
 			defer s.wg.Done()
-			discussions, err := s.requester.GetDiscussions(iid)
+			discussions, err := s.requester.GetDiscussions(item)
 			if err != nil {
 				log.Println(err)
 				return
@@ -212,7 +211,7 @@ func (s *MrService) getDiscussions(result map[int]*models.Result) map[int]*model
 					item.NeedDiscs[position] = position
 				}
 			}
-			result[iid] = item
+			result[item.Iid] = item
 			s.mu.Unlock()
 		}()
 	}
@@ -224,18 +223,18 @@ func (s *MrService) getDiscussions(result map[int]*models.Result) map[int]*model
 func (s *MrService) getPipelines(result map[int]*models.Result) map[int]models.Pipelines {
 	s.mu.RLock()
 	pipelinesMap := make(map[int]models.Pipelines, 5)
-	for iid := range result {
-		iid := iid
+	for _, item := range result {
+		item := item
 		s.wg.Add(1)
 		go func() {
 			defer s.wg.Done()
-			pipelines, err := s.requester.GetPipelines(iid)
+			pipelines, err := s.requester.GetPipelines(item)
 			if err != nil {
 				log.Println(err)
 				return
 			}
 			s.mu.Lock()
-			pipelinesMap[iid] = pipelines
+			pipelinesMap[item.Iid] = pipelines
 			s.mu.Unlock()
 		}()
 	}
@@ -251,6 +250,9 @@ func (s *MrService) getFailedPipelines(result map[int]*models.Result, pipelinesM
 
 	for mergeRequestIid, pipelines := range pipelinesMap {
 		mergeRequestIid := mergeRequestIid
+		if len(pipelines) < 1 {
+			continue
+		}
 		topPipeline := pipelines[0]
 		if topPipeline.ID < 1 {
 			continue
@@ -258,7 +260,7 @@ func (s *MrService) getFailedPipelines(result map[int]*models.Result, pipelinesM
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			pipelineSummary, err := s.requester.GetPipelineReport(topPipeline.ID)
+			pipelineSummary, err := s.requester.GetPipelineReport(topPipeline)
 			if err != nil {
 				log.Println(err)
 				return

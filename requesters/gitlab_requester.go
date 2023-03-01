@@ -51,7 +51,7 @@ func (r GitlabRequester) doGetRequest(url string) (response []byte, err error) {
 }
 
 func (r GitlabRequester) GetMergeRequests() (mergeRequests models.MergeRequests, err error) {
-	url := fmt.Sprintf("%v/projects/%v/merge_requests?scope=all&state=opened", r.config.ApiUrl, r.config.ProjectId)
+	url := r.config.ApiUrl + "/merge_requests?scope=all&state=opened"
 
 	response, err := r.doGetRequest(url)
 	if err != nil {
@@ -62,8 +62,8 @@ func (r GitlabRequester) GetMergeRequests() (mergeRequests models.MergeRequests,
 	return mergeRequests, err
 }
 
-func (r GitlabRequester) GetApprovals(mergeRequestIid int) (approval models.Approval, err error) {
-	url := fmt.Sprintf("%v/projects/%v/merge_requests/%v/approvals", r.config.ApiUrl, r.config.ProjectId, mergeRequestIid)
+func (r GitlabRequester) GetApprovals(item *models.Result) (approval models.Approval, err error) {
+	url := fmt.Sprintf("%v/projects/%v/merge_requests/%v/approvals", r.config.ApiUrl, item.ProjectID, item.Iid)
 	response, err := r.doGetRequest(url)
 	if err != nil {
 		return approval, err
@@ -73,8 +73,8 @@ func (r GitlabRequester) GetApprovals(mergeRequestIid int) (approval models.Appr
 	return approval, err
 }
 
-func (r GitlabRequester) GetDiscussions(mergeRequestIid int) (discussions models.Discussions, err error) {
-	url := fmt.Sprintf("%v/projects/%v/merge_requests/%v/discussions?per_page=100", r.config.ApiUrl, r.config.ProjectId, mergeRequestIid)
+func (r GitlabRequester) GetDiscussions(item *models.Result) (discussions models.Discussions, err error) {
+	url := fmt.Sprintf("%v/projects/%v/merge_requests/%v/discussions?per_page=100", r.config.ApiUrl, item.ProjectID, item.Iid)
 	response, err := r.doGetRequest(url)
 	if err != nil {
 		return discussions, err
@@ -84,8 +84,8 @@ func (r GitlabRequester) GetDiscussions(mergeRequestIid int) (discussions models
 	return discussions, err
 }
 
-func (r GitlabRequester) GetPipelines(mergeRequestIid int) (pipelines models.Pipelines, err error) {
-	url := fmt.Sprintf("%v/projects/%v/merge_requests/%v/pipelines", r.config.ApiUrl, r.config.ProjectId, mergeRequestIid)
+func (r GitlabRequester) GetPipelines(item *models.Result) (pipelines models.Pipelines, err error) {
+	url := fmt.Sprintf("%v/projects/%v/merge_requests/%v/pipelines", r.config.ApiUrl, item.ProjectID, item.Iid)
 	response, err := r.doGetRequest(url)
 	if err != nil {
 		return pipelines, err
@@ -95,8 +95,8 @@ func (r GitlabRequester) GetPipelines(mergeRequestIid int) (pipelines models.Pip
 	return pipelines, err
 }
 
-func (r GitlabRequester) GetPipelineReport(id int) (pipelineSummary models.PipelineSummary, err error) {
-	url := fmt.Sprintf("%v/projects/%v/pipelines/%v/test_report_summary", r.config.ApiUrl, r.config.ProjectId, id)
+func (r GitlabRequester) GetPipelineReport(pipeline models.Pipeline) (pipelineSummary models.PipelineSummary, err error) {
+	url := fmt.Sprintf("%v/projects/%v/pipelines/%v/test_report_summary", r.config.ApiUrl, pipeline.ProjectID, pipeline.ID)
 	response, err := r.doGetRequest(url)
 	if err != nil {
 		return pipelineSummary, err
