@@ -1,13 +1,15 @@
 package requesters
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/xpohoc69/mrboard/models"
 	"io"
 	"net/http"
 	"time"
+
+	"github.com/xpohoc69/mrboard/models"
 )
 
 type GitlabRequester struct {
@@ -23,7 +25,7 @@ func NewRequester(config *models.Config) *GitlabRequester {
 }
 
 func (r GitlabRequester) doGetRequest(url string) (response []byte, err error) {
-	req, err := http.NewRequest("GET", url, nil)
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, url, nil)
 	if err != nil {
 		return response, err
 	}
@@ -44,11 +46,12 @@ func (r GitlabRequester) doGetRequest(url string) (response []byte, err error) {
 	if err != nil {
 		return response, err
 	}
+
 	return response, err
 }
 
 func (r GitlabRequester) GetMergeRequests() (mergeRequests models.MergeRequests, err error) {
-	url := r.config.ApiUrl + "/merge_requests?scope=all&state=opened"
+	url := fmt.Sprintf("%v/projects/%v/merge_requests?scope=all&state=opened", r.config.ApiUrl, r.config.ProjectId)
 
 	response, err := r.doGetRequest(url)
 	if err != nil {

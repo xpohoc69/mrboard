@@ -2,12 +2,6 @@ package services
 
 import (
 	"fmt"
-	"github.com/cheggaaa/pb/v3"
-	"github.com/gookit/goutil/arrutil"
-	"github.com/gookit/goutil/maputil"
-	"github.com/olekukonko/tablewriter"
-	"github.com/xpohoc69/mrboard/models"
-	"github.com/xpohoc69/mrboard/requesters"
 	"log"
 	"os"
 	"regexp"
@@ -15,6 +9,13 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+
+	"github.com/cheggaaa/pb/v3"
+	"github.com/gookit/goutil/arrutil"
+	"github.com/gookit/goutil/maputil"
+	"github.com/olekukonko/tablewriter"
+	"github.com/xpohoc69/mrboard/models"
+	"github.com/xpohoc69/mrboard/requesters"
 )
 
 const progressSteps = 3
@@ -65,6 +66,7 @@ func (s *MrService) PrepareResult() map[int]*models.Result {
 	progressBar.Increment()
 	result = s.getFailedPipelines(result, pipelines)
 	progressBar.Finish()
+
 	return result
 }
 
@@ -78,7 +80,7 @@ func (s *MrService) PrintTable(result map[int]*models.Result) {
 	table.SetRowLine(true)
 	table.SetHeader(headers)
 
-	var keys []int
+	keys := make([]int, 0, len(result))
 	for iid := range result {
 		keys = append(keys, iid)
 	}
@@ -134,7 +136,7 @@ func (s *MrService) PrintTable(result map[int]*models.Result) {
 		table.Append(row)
 	}
 
-	fmt.Println()
+	fmt.Print("\n")
 	table.Render()
 }
 
@@ -171,6 +173,7 @@ func (s *MrService) getApprovals(result map[int]*models.Result) map[int]*models.
 		}()
 	}
 	s.mu.RUnlock()
+
 	return result
 }
 
@@ -214,6 +217,7 @@ func (s *MrService) getDiscussions(result map[int]*models.Result) map[int]*model
 		}()
 	}
 	s.mu.RUnlock()
+
 	return result
 }
 
@@ -287,5 +291,6 @@ func (s *MrService) filterMergeRequests(mergeRequests models.MergeRequests) mode
 		}
 		filteredMergeRequests = append(filteredMergeRequests, mR)
 	}
+
 	return filteredMergeRequests
 }

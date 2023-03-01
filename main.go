@@ -2,17 +2,18 @@ package main
 
 import (
 	"flag"
+	"log"
+	"os"
+	"strings"
+
 	"github.com/joho/godotenv"
 	"github.com/xpohoc69/mrboard/models"
 	"github.com/xpohoc69/mrboard/requesters"
 	"github.com/xpohoc69/mrboard/services"
-	"log"
-	"os"
-	"strings"
 )
 
-var config = &models.Config{}
 var flags = &models.Flags{}
+var config = &models.Config{}
 var requester = requesters.NewRequester(config)
 var service = services.NewMrService(config, requester, flags)
 
@@ -29,8 +30,7 @@ func init() {
 		envPath = flags.Env
 	}
 
-	err := godotenv.Load(envPath)
-	if err != nil {
+	if err := godotenv.Load(envPath); err != nil {
 		log.Fatal("Error loading .env file")
 	}
 	splitUsers := strings.Split(os.Getenv("APP_USERS"), ",")

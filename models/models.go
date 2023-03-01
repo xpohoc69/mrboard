@@ -50,12 +50,12 @@ type Approval struct {
 type Discussions []struct {
 	Id    string `json:"id"`
 	Notes []struct {
-		NoteableId int  `json:"noteable_id"`
-		Resolvable bool `json:"resolvable"`
-		Position   struct {
+		Position struct {
 			HeadSha string `json:"head_sha"`
 		} `json:"position,omitempty"`
-		Resolved bool `json:"resolved,omitempty"`
+		NoteableId int  `json:"noteable_id"`
+		Resolvable bool `json:"resolvable"`
+		Resolved   bool `json:"resolved,omitempty"`
 	} `json:"notes"`
 }
 
@@ -95,6 +95,7 @@ func (nA NeedApprovals) String() string {
 		sb.WriteString(delim + user)
 		delim = "\n"
 	}
+
 	return sb.String()
 }
 
@@ -107,6 +108,7 @@ func (hA HasApprovals) String() string {
 		sb.WriteString(delim + user)
 		delim = "\n"
 	}
+
 	return sb.String()
 }
 
